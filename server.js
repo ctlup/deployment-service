@@ -64,7 +64,7 @@ const PORT = process.env.PORT || 30100;
 let github_secret = null;
 
 try {
-    github_secret = fs.readFileSync(process.engv.SECRET_FILE || './secret-github', 'utf-8');
+    github_secret = fs.readFileSync(process.env.SECRET_FILE || './secret-github', 'utf-8');
 } catch (e) {
     logger.warn('The SECRET_FILE was not found. The secret will be ignored.')
 }
