@@ -35,13 +35,13 @@ const depScriptPathTargets = envKeys
     .map(k => k.slice(0, -PATH_SUFFIX.length));
 const branchNameTargets = envKeys
     .filter(k => k.endsWith(BRANCH_SUFFIX))
-    .map(k => k.slice(0, BRANCH_SUFFIX));
+    .map(k => k.slice(0, -BRANCH_SUFFIX.length));
     
 
 const pathSet = new Set(depScriptPathTargets);
 const branchSet = new Set(branchNameTargets);
 
-if (areSetsEqual(pathSet, branchSet)) {
+if (!areSetsEqual(pathSet, branchSet)) {
     
     throw new Error(`Error in ENV file. The target names for the deployment paths and branch names have to be the same. \
         For each target in branch name, there should be the same target in script path, and vice versa. \
@@ -60,9 +60,15 @@ logger.info(`Listening for the updates in the following branches and calling the
 
 const app = express();
 
-const PORT = 30100;
-const github_secret = fs.readFileSync('./secret-github', 'utf-8');
-const webhooks = new Webhooks({
+const PORT = process.env.PORT || 30100;
+let github_secret = null;
+
+try {
+    github_secret = fs.readFileSync(process.engv.SECRET_FILE || './secret-github', 'utf-8');
+} catch (e) {
+    logger.warn('The SECRET_FILE was not found. The secret will be ignored.')
+}
+const webhooks = github_secret && new Webhooks({
     secret: github_secret,
 });
 
@@ -85,9 +91,9 @@ app.post('/handler', async (req, res) => {
 
     const event = req.headers['x-github-event'];
     const branch = req.body?.ref?.split('/').slice(-1)[0];
-    const isValid = await webhooks.verify(JSON.stringify(req.body), signature)
+    const isValid = await webhooks?.verify(JSON.stringify(req.body), signature)
     
-    if (!isValid) {
+    if (github_secret && !isValid) {
         logger.error('The signature is not valid.');
         res.status(401).send('Unauthorized');
         return;
