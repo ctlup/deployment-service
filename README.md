@@ -13,3 +13,7 @@ There can be different target for the deployment (DEV, PROD etc.) Each target re
 For each target, there should be one `<target>_BRANCH_NAME` that specifies the ref id from the repository to which it subscribed and `<target>_SCRIPT_PATH` that specifies the script, which is supposed to be run when the `push` event occurred.
 
 You can specify the *secret* string to validate the hook delivery. For this, create in the root `secret-github` file (without file extension) and place inside the secret string.
+
+## License
+
+MIT

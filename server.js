@@ -66,14 +66,12 @@ const webhooks = new Webhooks({
     secret: github_secret,
 });
 
-// branch name to path
-
 const branchToPath = depScriptPathTargets.reduce((acc, target) => {
     acc[process.env[target + BRANCH_SUFFIX]] = process.env[target + PATH_SUFFIX];
     return acc;
 }, {})
 
-const branches = Object.keys(branchToPath);
+// const branches = Object.keys(branchToPath);
 
 app.use(express.text())
 app.use(express.json())
@@ -84,7 +82,7 @@ app.post('/handler', async (req, res) => {
 
     
     const signature = req.headers['x-hub-signature-256']; 
-    // console.log(req.headers)
+
     const event = req.headers['x-github-event'];
     const branch = req.body?.ref?.split('/').slice(-1)[0];
     const isValid = await webhooks.verify(JSON.stringify(req.body), signature)
